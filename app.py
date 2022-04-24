@@ -171,6 +171,41 @@ JUST_TONES = {
     "B5": A4.up(OCTAVE).up(MAJOR_SECOND),
 }
 
+STEPS = {
+    ("A", "B"): 2,
+    ("B", "C"): 1,
+    ("C", "D"): 2,
+    ("D", "E"): 2,
+    ("E", "F"): 1,
+    ("F", "G"): 2,
+    ("G", "A"): 2,
+}
+
+
+def calculate_equal_tone(steps: int):
+    return 440 * (2 ** (1 / 12)) ** steps
+
+
+EQUAL_TONES = {
+    "G3": calculate_equal_tone(-14),
+    "A3": calculate_equal_tone(-12),
+    "B3": calculate_equal_tone(-10),
+    "C3": calculate_equal_tone(-9),
+    "D4": calculate_equal_tone(-7),
+    "E4": calculate_equal_tone(-5),
+    "F4": calculate_equal_tone(-4),
+    "G4": calculate_equal_tone(-2),
+    "A4": calculate_equal_tone(0),
+    "B4": calculate_equal_tone(2),
+    "C4": calculate_equal_tone(3),
+    "D5": calculate_equal_tone(5),
+    "E5": calculate_equal_tone(7),
+    "F5": calculate_equal_tone(8),
+    "G5": calculate_equal_tone(10),
+    "A5": calculate_equal_tone(12),
+    "B5": calculate_equal_tone(14),
+}
+
 
 def hz_to_nearest_tone(hz: float):
     min_name = None
@@ -213,7 +248,7 @@ def compute_interval(note: str, interval: Interval, direction: str):
     return NOTES[next_idx]
 
 
-st.header("Music Intervals and Tuning")
+st.header("Music Intervals, Equal Temperament, and Just Temperament")
 
 col0, col1, col2 = st.columns(3)
 with col0:
@@ -275,7 +310,8 @@ for name, tone in JUST_TONES.items():
         {
             "tone": name,
             "hz_frac": f"A440 * {tone.ratio}",
-            "hz": tone.hz,
+            "just hz": tone.hz,
+            "equal hz": EQUAL_TONES[name],
             "derivation": tone.derivation,
         }
     )
