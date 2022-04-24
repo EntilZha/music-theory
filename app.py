@@ -4,7 +4,16 @@ from fractions import Fraction
 import pandas as pd
 
 
-st.set_page_config("Music Intervals and Tuning", "🎼", "wide")
+st.set_page_config(
+    page_title="Music Intervals and Tuning",
+    page_icon="🎼",
+    layout="wide",
+    menu_items={
+        "Get help": "Go to https://github.com/entilzha/music-theory",
+        "Report a Bug": "Go to https://github.com/entilzha/music-theory",
+        "About": "Code at https://github.com/entilzha/music-theory, by Pedro Rodriguez https://www.pedro.ai",
+    },
+)
 DOWN = "down"
 UP = "up"
 
@@ -134,18 +143,21 @@ class Note:
         out = f"{self.name} ({self.root_hz})"
         names = []
         fracs = []
-        for s in self.shifts:
-            if s.direction == UP:
-                names.append(f"⬆️ {s.name}")
-                fracs.append(f"{s.ratio}")
-            elif s.direction == DOWN:
-                names.append(f"⬇️ {s.name}")
-                fracs.append(f"{1 / s.ratio}")
-            else:
-                ValueError()
-        names = " ".join(names)
-        fracs = " * ".join(fracs)
-        return out + " " + names + " = " + fracs
+        if len(self.shifts) > 0:
+            for s in self.shifts:
+                if s.direction == UP:
+                    names.append(f"⬆️ {s.name}")
+                    fracs.append(f"{s.ratio}")
+                elif s.direction == DOWN:
+                    names.append(f"⬇️ {s.name}")
+                    fracs.append(f"{1 / s.ratio}")
+                else:
+                    ValueError()
+            names = " ".join(names)
+            fracs = " * ".join(fracs)
+            return out + " " + names + " = " + fracs
+        else:
+            return out
 
 
 A4 = Note("A4", 440)
