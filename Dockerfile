@@ -10,4 +10,4 @@ RUN poetry export --without-hashes -f requirements.txt > reqs.txt && pip install
 COPY . /code/music-theory
 EXPOSE 8501
 
-CMD ["streamlit", "run", "app.py"]
+CMD ["streamlit", "run", "--server.address", "0.0.0.0", "app.py"]
