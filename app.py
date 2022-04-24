@@ -9,8 +9,8 @@ st.set_page_config(
     page_icon="🎼",
     layout="wide",
     menu_items={
-        "Get help": "Go to https://github.com/entilzha/music-theory",
-        "Report a Bug": "Go to https://github.com/entilzha/music-theory",
+        "Get help": "https://github.com/entilzha/music-theory",
+        "Report a Bug": "https://github.com/entilzha/music-theory",
         "About": "Code at https://github.com/entilzha/music-theory, by Pedro Rodriguez https://www.pedro.ai",
     },
 )
