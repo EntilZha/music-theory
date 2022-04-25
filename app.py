@@ -1,4 +1,5 @@
 from typing import Optional, List
+import re
 import streamlit as st
 from fractions import Fraction
 import pandas as pd
@@ -165,21 +166,32 @@ A4 = Note("A4", 440)
 
 JUST_TONES = {
     "G3": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH),
+    "G♯3/A♭3": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH).up(MINOR_SECOND),
     "A3": A4.down(OCTAVE),
+    "A♯3/B♭3": A4.down(OCTAVE).up(MINOR_SECOND),
     "B3": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH).up(MAJOR_THIRD),
     "C3": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH).up(PERFECT_FOURTH),
+    "C♯3/D♭4": A4.down(PERFECT_FIFTH).down(MINOR_SECOND),
     "D4": A4.down(PERFECT_FIFTH),
     "E4": A4.up(PERFECT_FIFTH).down(OCTAVE),
     "F4": A4.down(PERFECT_FIFTH).up(MINOR_THIRD),
-    "G4": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH).up(OCTAVE),
+    "F♯4/G♭4": A4.down(PERFECT_FIFTH).up(MAJOR_THIRD),
+    "G4": A4.up(PERFECT_FOURTH),
+    "G♯4/A♭4": A4.down(MINOR_SECOND),
     "A4": A4,
+    "A♯4/B♭4": A4.up(MINOR_SECOND),
     "B4": A4.up(MAJOR_SECOND),
     "C4": A4.up(MINOR_THIRD),
-    "D5": A4.down(PERFECT_FIFTH).up(OCTAVE),
+    "C♯4/D♭5": A4.up(MAJOR_THIRD),
+    "D5": A4.up(PERFECT_FOURTH),
+    "D♯5/E♭5": A4.down(PERFECT_FIFTH).up(OCTAVE).up(MINOR_SECOND),
     "E5": A4.up(PERFECT_FIFTH),
     "F5": A4.up(MINOR_SIXTH),
+    "F♯5/G♭5": A4.up(PERFECT_FIFTH).up(MAJOR_SECOND),
     "G5": A4.down(PERFECT_FIFTH).down(PERFECT_FIFTH).up(OCTAVE).up(OCTAVE),
+    "G♯5/A♭5": A4.up(OCTAVE).down(MINOR_SECOND),
     "A5": A4.up(OCTAVE),
+    "A♯5/B♭5": A4.up(OCTAVE).up(MINOR_SECOND),
     "B5": A4.up(OCTAVE).up(MAJOR_SECOND),
 }
 
@@ -200,21 +212,33 @@ def calculate_equal_tone(steps: int):
 
 EQUAL_TONES = {
     "G3": calculate_equal_tone(-14),
+    "G♯3/A♭3": calculate_equal_tone(-13),
     "A3": calculate_equal_tone(-12),
+    "A♯3/B♭3": calculate_equal_tone(-11),
     "B3": calculate_equal_tone(-10),
     "C3": calculate_equal_tone(-9),
+    "C♯3/D♭4": calculate_equal_tone(-8),
     "D4": calculate_equal_tone(-7),
+    "D♯4/E♭4": calculate_equal_tone(-6),
     "E4": calculate_equal_tone(-5),
     "F4": calculate_equal_tone(-4),
+    "F♯4/G♭4": calculate_equal_tone(-3),
     "G4": calculate_equal_tone(-2),
+    "G♯4/A♭4": calculate_equal_tone(-1),
     "A4": calculate_equal_tone(0),
+    "A♯4/B♭4": calculate_equal_tone(1),
     "B4": calculate_equal_tone(2),
     "C4": calculate_equal_tone(3),
+    "C♯4/D♭5": calculate_equal_tone(4),
     "D5": calculate_equal_tone(5),
+    "D♯5/E♭5": calculate_equal_tone(6),
     "E5": calculate_equal_tone(7),
     "F5": calculate_equal_tone(8),
+    "F♯5/G♭5": calculate_equal_tone(9),
     "G5": calculate_equal_tone(10),
+    "G♯5/A♭5": calculate_equal_tone(11),
     "A5": calculate_equal_tone(12),
+    "A♯5/B♭5": calculate_equal_tone(13),
     "B5": calculate_equal_tone(14),
 }
 
@@ -233,16 +257,16 @@ def hz_to_nearest_tone(hz: float):
 
 NOTES = [
     "C",
-    "C#/Db",
+    "C♯/D♭",
     "D",
-    "D#/Eb",
+    "D♯/E♭",
     "E",
     "F",
-    "F#/Gb",
+    "F♯/G♭",
     "G",
-    "G#/Ab",
+    "G♯/A♭",
     "A",
-    "A#/Bb",
+    "A♯/B♭",
     "B",
 ]
 NOTE_TO_NUM = {n: i for i, n in enumerate(NOTES)}
@@ -278,25 +302,22 @@ paired_note = compute_interval(
 
 
 def compute_new_tones(note: str, result_note: str, interval: Interval, direction: str):
-    if "#" in note or "b" in note:
-        return "TODO"
-    else:
-        matching = []
-        for numbered_note, value in JUST_TONES.items():
-            if numbered_note[0] == note:
-                if direction == UP:
-                    root_hz = value.hz
-                    result_hz = float(root_hz * interval.ratio)
-                elif direction == DOWN:
-                    root_hz = value.hz
-                    result_hz = float(root_hz / interval.ratio)
-                else:
-                    raise ValueError()
-                nearest_name, nearest_note = hz_to_nearest_tone(result_hz)
-                matching.append(
-                    f"**Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz}\n"
-                )
-        return "* ".join(matching)
+    matching = []
+    for numbered_note, value in JUST_TONES.items():
+        if re.sub(r"[0-9]", "", numbered_note) == note:
+            if direction == UP:
+                root_hz = value.hz
+                result_hz = float(root_hz * interval.ratio)
+            elif direction == DOWN:
+                root_hz = value.hz
+                result_hz = float(root_hz / interval.ratio)
+            else:
+                raise ValueError()
+            nearest_name, nearest_note = hz_to_nearest_tone(result_hz)
+            matching.append(
+                f"**Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz}\n"
+            )
+    return "* ".join(matching)
 
 
 matching_tones = compute_new_tones(
