@@ -35,8 +35,10 @@ jobs:
           port: 22
           key: ${{ secrets.KEY }}
           script: |
+            set -e
             cd ~/code/music-theory
             docker-compose down
             git pull origin main
             docker-compose build
             docker-compose up -d
+            bash ~/pushcut.sh "Github Deploy" "Deploy of music.pedro.ai successful!"
