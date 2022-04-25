@@ -50,6 +50,7 @@ class DirectedInterval(Interval):
         self.direction = direction
 
 
+UNISON_RATIO = Fraction(1, 1)
 MINOR_SECOND_RATIO = Fraction(16, 15)
 MAJOR_SECOND_RATIO = Fraction(9, 8)
 MINOR_THIRD_RATIO = Fraction(6, 5)
@@ -62,7 +63,7 @@ MAJOR_SEVENTH_RATIO = Fraction(15, 8)
 MINOR_SEVENTH_RATIO = Fraction(9, 5)
 OCTAVE_RATIO = Fraction(2, 1)
 
-
+UNISON = Interval(name="Unison", ratio=UNISON_RATIO, n_semitones=0)
 MINOR_SECOND = Interval(name="Minor Second", ratio=MINOR_SECOND_RATIO, n_semitones=1)
 MAJOR_SECOND = Interval(name="Major Second", ratio=MAJOR_SECOND_RATIO, n_semitones=2)
 MINOR_THIRD = Interval(name="Minor Third", ratio=MINOR_THIRD_RATIO, n_semitones=3)
@@ -95,6 +96,7 @@ INTERVALS = [
     MAJOR_SEVENTH,
     OCTAVE,
 ]
+N_SEMITONES_TO_INTERVAL = {i.n_semitones: i for i in INTERVALS}
 NAME_TO_INTERVAL = {str(i): i for i in INTERVALS}
 
 
@@ -315,9 +317,9 @@ def compute_new_tones(note: str, result_note: str, interval: Interval, direction
                 raise ValueError()
             nearest_name, nearest_note = hz_to_nearest_tone(result_hz)
             matching.append(
-                f"**Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz}\n"
+                f"  * **Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz}"
             )
-    return "* ".join(matching)
+    return "\n".join(matching) + "\n"
 
 
 matching_tones = compute_new_tones(
@@ -326,15 +328,45 @@ matching_tones = compute_new_tones(
     NAME_TO_INTERVAL[selected_interval_name],
     selected_direction,
 )
-st.markdown(
-    f"""
-* **First Note**: {selected_note}
-* **Interval**: {selected_interval_name} **Direction**: {selected_direction}
-* **Second Note**: {paired_note}
-* **Nearest Just Tones**:
-* {matching_tones}
-"""
-)
+
+left, right = st.columns(2)
+with left:
+    st.markdown(
+        f"""
+    * **First Note**: {selected_note}
+    * **Interval**: {selected_interval_name} **Direction**: {selected_direction}
+    * **Second Note**: {paired_note}
+    * **Nearest Just Tones**:
+    {matching_tones}
+    """
+    )
+
+
+def combined_format(name):
+    interval = NAME_TO_INTERVAL[name]
+    return f"{interval.name} ({interval.n_semitones})"
+
+
+with right:
+    selected_combined_intervals = st.multiselect(
+        "Select Intervals to Combine",
+        2 * list(NAME_TO_INTERVAL),
+        format_func=combined_format,
+    )
+    semitones = (
+        sum(NAME_TO_INTERVAL[name].n_semitones for name in selected_combined_intervals)
+        % 12
+    )
+    if semitones == 6:
+        combined_interval = "Tritone"
+    else:
+        combined_interval = N_SEMITONES_TO_INTERVAL[semitones]
+    st.markdown(
+        f"""
+    * Semitones: {semitones}
+    * Interval: {combined_interval}
+    """
+    )
 
 
 rows = []
