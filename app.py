@@ -84,6 +84,7 @@ MAJOR_SEVENTH = Interval(
 OCTAVE = Interval(name="Octave", ratio=OCTAVE_RATIO, n_semitones=12)
 
 INTERVALS = [
+    UNISON,
     MINOR_SECOND,
     MAJOR_SECOND,
     MINOR_THIRD,
