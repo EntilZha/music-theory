@@ -304,6 +304,10 @@ paired_note = compute_interval(
 )
 
 
+def calculate_tartini_tone(first_hz: float, second_hz: float):
+    return abs(first_hz - second_hz)
+
+
 def compute_new_tones(note: str, result_note: str, interval: Interval, direction: str):
     matching = []
     for numbered_note, value in JUST_TONES.items():
@@ -317,8 +321,10 @@ def compute_new_tones(note: str, result_note: str, interval: Interval, direction
             else:
                 raise ValueError()
             nearest_name, nearest_note = hz_to_nearest_tone(result_hz)
+            tartini_hz = calculate_tartini_tone(root_hz, result_hz)
+            tartini_name, nearest_tartini_note = hz_to_nearest_tone(tartini_hz)
             matching.append(
-                f"  * **Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz}"
+                f"  * **Root**: {numbered_note} {root_hz:.4f} **Result**: {result_note} {result_hz:.4f} **Nearest**: {nearest_name} {nearest_note.hz} **True Tartini**: {tartini_hz:.4f} **Nearest Tartini**: {tartini_name} {nearest_tartini_note.hz:.4f}"
             )
     return "\n".join(matching) + "\n"
 
